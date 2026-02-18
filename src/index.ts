@@ -1,9 +1,10 @@
+import type { ConfigSchema, WOPRPlugin, WOPRPluginContext } from "@wopr-network/plugin-types";
 import { nostrChannelProvider, setBotNpub, setPublisher } from "./channel-provider.js";
 import { derivePublicKey, formatNpub, parsePrivateKey } from "./crypto.js";
 import { EventHandler } from "./event-handler.js";
 import { EventPublisher } from "./event-publisher.js";
 import { RelayPoolManager } from "./relay-pool.js";
-import type { ConfigSchema, NostrConfig, WOPRPlugin, WOPRPluginContext } from "./types.js";
+import type { NostrConfig } from "./types.js";
 
 let pluginCtx: WOPRPluginContext | null = null;
 let poolManager: RelayPoolManager | null = null;
