@@ -5,7 +5,6 @@
     "": {
       "name": "@wopr-network/wopr-plugin-nostr",
       "dependencies": {
-        "@wopr-network/plugin-types": "^0.2.1",
         "nostr-tools": "^2.10.0",
       },
       "devDependencies": {
@@ -13,6 +12,9 @@
         "@types/node": "^25.0.0",
         "typescript": "^5.3.0",
         "vitest": "^4.0.0",
+      },
+      "peerDependencies": {
+        "@wopr-network/plugin-types": "^0.2.1",
       },
     },
   },
