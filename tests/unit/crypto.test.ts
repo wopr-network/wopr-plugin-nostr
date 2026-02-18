@@ -81,11 +81,9 @@ describe("crypto", () => {
       const result = await encryptDM(aliceSk, bobPubkey, "hello");
       expect(typeof result).toBe("string");
       expect(result.length).toBeGreaterThan(0);
-      // NIP-04 ciphertext format includes "?iv="
-      expect(result).toContain("?iv=");
     });
 
-    it("decryptDM decrypts a NIP-04 encrypted message", async () => {
+    it("decryptDM decrypts a NIP-44 encrypted message", async () => {
       const { encryptDM, decryptDM } = await import("../../src/crypto.js");
       const aliceSk = generateSecretKey();
       const bobSk = generateSecretKey();

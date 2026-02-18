@@ -17,7 +17,7 @@ npm test          # vitest run
 
 ## Architecture
 
-```
+```text
 src/
   index.ts              # Plugin entry — exports WOPRPlugin default
   channel-provider.ts   # Implements ChannelProvider interface

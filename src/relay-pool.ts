@@ -70,11 +70,12 @@ export class RelayPoolManager {
    * Resolves when at least one relay accepts it.
    */
   async publish(signedEvent: unknown): Promise<void> {
+    const results = this.pool.publish(this.relayUrls, signedEvent as VerifiedEvent);
     try {
-      const results = this.pool.publish(this.relayUrls, signedEvent as VerifiedEvent);
       await Promise.any(results);
     } catch (err) {
       this.log.error("Failed to publish event to any relay", err);
+      throw new Error("Failed to publish event to any relay", { cause: err });
     }
   }
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 describe("nostrChannelProvider", () => {
   let mockPublisher: {
@@ -8,10 +8,18 @@ describe("nostrChannelProvider", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.resetModules();
     mockPublisher = {
       publishDM: vi.fn().mockResolvedValue("event-id"),
       publishReply: vi.fn().mockResolvedValue("reply-id"),
     };
+  });
+
+  afterEach(async () => {
+    const { nostrChannelProvider } = await import("../../src/channel-provider.js");
+    for (const cmd of nostrChannelProvider.getCommands()) {
+      nostrChannelProvider.unregisterCommand(cmd.name);
+    }
   });
 
   it("send with dm:<pubkey> calls publisher.publishDM with correct pubkey and content", async () => {

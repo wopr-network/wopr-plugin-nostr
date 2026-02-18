@@ -1,12 +1,6 @@
-import * as nip04 from "nostr-tools/nip04";
 import * as nip19 from "nostr-tools/nip19";
+import * as nip44 from "nostr-tools/nip44";
 import { getPublicKey } from "nostr-tools/pure";
-
-function bytesToHex(bytes: Uint8Array): string {
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
 
 function hexToBytes(hex: string): Uint8Array {
   if (hex.length % 2 !== 0) throw new Error("Invalid hex string: odd length");
@@ -60,17 +54,19 @@ export function formatNpub(hexPubkey: string): string {
 }
 
 /**
- * Encrypt a plaintext message for a recipient using NIP-04.
+ * Encrypt a plaintext message for a recipient using NIP-44.
  * Returns the ciphertext string.
  */
 export async function encryptDM(sk: Uint8Array, recipientPubkey: string, plaintext: string): Promise<string> {
-  return nip04.encrypt(bytesToHex(sk), recipientPubkey, plaintext);
+  const conversationKey = nip44.getConversationKey(sk, recipientPubkey);
+  return nip44.encrypt(plaintext, conversationKey);
 }
 
 /**
- * Decrypt a NIP-04 ciphertext from a sender.
+ * Decrypt a NIP-44 ciphertext from a sender.
  * Returns the plaintext string.
  */
 export async function decryptDM(sk: Uint8Array, senderPubkey: string, ciphertext: string): Promise<string> {
-  return nip04.decrypt(bytesToHex(sk), senderPubkey, ciphertext);
+  const conversationKey = nip44.getConversationKey(sk, senderPubkey);
+  return nip44.decrypt(ciphertext, conversationKey);
 }

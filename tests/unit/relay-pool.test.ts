@@ -67,15 +67,14 @@ describe("RelayPoolManager", () => {
     expect(mockPublish).toHaveBeenCalledWith(relayUrls, signedEvent);
   });
 
-  it("publish logs error when all relays reject", async () => {
+  it("publish logs error and rejects when all relays reject", async () => {
     mockPublish.mockReturnValue([Promise.reject(new Error("relay1 rejected")), Promise.reject(new Error("relay2 rejected"))]);
 
     const { RelayPoolManager } = await import("../../src/relay-pool.js");
     const manager = new RelayPoolManager(relayUrls, mockLog);
     const signedEvent = { id: "abc", kind: 1, content: "hello" };
 
-    // Should not throw even when all relays reject
-    await expect(manager.publish(signedEvent)).resolves.toBeUndefined();
+    await expect(manager.publish(signedEvent)).rejects.toThrow("Failed to publish event to any relay");
     expect(mockLog.error).toHaveBeenCalled();
   });
 
