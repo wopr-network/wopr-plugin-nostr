@@ -44,5 +44,8 @@
     "protocol"
   ],
   "author": "WOPR",
-  "license": "MIT"
+  "license": "MIT",
+  "release": {
+    "extends": "@wopr-network/semantic-release-config"
+  }
 }
