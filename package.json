@@ -1,7 +1,7 @@
 {
   "name": "@wopr-network/wopr-plugin-nostr",
   "version": "1.0.0",
-  "description": "Nostr protocol integration for WOPR — encrypted DMs and public replies",
+  "description": "Nostr protocol integration for WOPR \u2014 encrypted DMs and public replies",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -26,11 +26,23 @@
     "@biomejs/biome": "^2.3.15",
     "@types/node": "^25.0.0",
     "typescript": "^5.3.0",
-    "vitest": "^4.0.0"
+    "vitest": "^4.0.0",
+    "semantic-release": "^24.0.0",
+    "@wopr-network/semantic-release-config": "^1.0.0"
   },
-  "publishConfig": { "access": "public" },
-  "files": ["dist"],
-  "keywords": ["wopr", "plugin", "nostr", "decentralized", "protocol"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "wopr",
+    "plugin",
+    "nostr",
+    "decentralized",
+    "protocol"
+  ],
   "author": "WOPR",
   "license": "MIT"
 }
