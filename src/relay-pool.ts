@@ -73,9 +73,9 @@ export class RelayPoolManager {
     const results = this.pool.publish(this.relayUrls, signedEvent as VerifiedEvent);
     try {
       await Promise.any(results);
-    } catch (err) {
-      this.log.error("Failed to publish event to any relay", err);
-      throw new Error("Failed to publish event to any relay", { cause: err });
+    } catch (error: unknown) {
+      this.log.error("Failed to publish event to any relay", error);
+      throw new Error("Failed to publish event to any relay", { cause: error });
     }
   }
 

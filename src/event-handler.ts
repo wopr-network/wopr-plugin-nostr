@@ -64,8 +64,8 @@ export class EventHandler {
     let plaintext: string;
     try {
       plaintext = await decryptDM(this.sk, event.pubkey, event.content);
-    } catch (err) {
-      this.ctx.log.error(`Failed to decrypt DM from ${event.pubkey}`, err);
+    } catch (error: unknown) {
+      this.ctx.log.error(`Failed to decrypt DM from ${event.pubkey}`, error);
       return;
     }
 
@@ -82,8 +82,8 @@ export class EventHandler {
         from: npub,
         channel: channelRef,
       });
-    } catch (err) {
-      this.ctx.log.error(`Failed to inject DM from ${npub}`, err);
+    } catch (error: unknown) {
+      this.ctx.log.error(`Failed to inject DM from ${npub}`, error);
       return;
     }
 
@@ -109,8 +109,8 @@ export class EventHandler {
         from: npub,
         channel: channelRef,
       });
-    } catch (err) {
-      this.ctx.log.error(`Failed to inject mention from ${npub}`, err);
+    } catch (error: unknown) {
+      this.ctx.log.error(`Failed to inject mention from ${npub}`, error);
       return;
     }
 
