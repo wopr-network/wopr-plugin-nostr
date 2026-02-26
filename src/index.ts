@@ -9,6 +9,7 @@ import type { NostrConfig } from "./types.js";
 let pluginCtx: WOPRPluginContext | null = null;
 let poolManager: RelayPoolManager | null = null;
 let subscription: { close(): void } | null = null;
+const cleanups: Array<() => void> = [];
 
 const DEFAULT_RELAYS = ["wss://relay.damus.io", "wss://relay.nostr.band", "wss://nos.lol", "wss://relay.snort.social"];
 
@@ -23,6 +24,8 @@ const configSchema: ConfigSchema = {
       placeholder: "nsec1...",
       required: true,
       description: "Your Nostr private key in nsec (bech32) or hex format",
+      secret: true,
+      setupFlow: "paste",
     },
     {
       name: "relays",
@@ -99,11 +102,13 @@ const plugin: WOPRPlugin = {
       shutdownBehavior: "drain",
       shutdownTimeoutMs: 10_000,
     },
+    configSchema,
   },
 
   async init(ctx: WOPRPluginContext) {
     pluginCtx = ctx;
     ctx.registerConfigSchema("wopr-plugin-nostr", configSchema);
+    cleanups.push(() => ctx.unregisterConfigSchema("wopr-plugin-nostr"));
 
     const config = ctx.getConfig<NostrConfig>();
 
@@ -116,8 +121,8 @@ const plugin: WOPRPlugin = {
         return;
       }
       sk = parsePrivateKey(nsecInput);
-    } catch (err) {
-      ctx.log.error("Invalid Nostr private key", err);
+    } catch (error: unknown) {
+      ctx.log.error("Invalid Nostr private key", error);
       return;
     }
 
@@ -154,8 +159,8 @@ const plugin: WOPRPlugin = {
 
     subscription = poolManager.subscribe(filters, {
       onevent: (event: unknown) => {
-        handler.handleEvent(event as Parameters<EventHandler["handleEvent"]>[0]).catch((err) => {
-          pluginCtx?.log.error("Error handling Nostr event", err);
+        handler.handleEvent(event as Parameters<EventHandler["handleEvent"]>[0]).catch((error: unknown) => {
+          pluginCtx?.log.error("Error handling Nostr event", error);
         });
       },
       oneose: () => {
@@ -165,6 +170,7 @@ const plugin: WOPRPlugin = {
 
     // 6. Register channel provider
     ctx.registerChannelProvider(nostrChannelProvider);
+    cleanups.push(() => ctx.unregisterChannelProvider("nostr"));
     ctx.log.info(`Nostr plugin initialized — listening on ${relayUrls.length} relays`);
   },
 
@@ -178,7 +184,8 @@ const plugin: WOPRPlugin = {
       poolManager = null;
     }
     setPublisher(null);
-    pluginCtx?.unregisterChannelProvider("nostr");
+    for (const cleanup of cleanups) cleanup();
+    cleanups.length = 0;
     pluginCtx = null;
   },
 };
