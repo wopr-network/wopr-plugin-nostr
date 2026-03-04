@@ -97,6 +97,9 @@ export const nostrChannelProvider: ChannelProvider = {
       id: parserId,
       pattern: (msg: string) => /^\s*(accept|deny)\s*$/i.test(msg),
       handler: async (ctx) => {
+        // Guard: only process from the intended channel and recipient
+        if (ctx.channel !== channelId) return;
+        if (ctx.sender !== recipientPubkey) return;
         const normalized = ctx.content.trim().toUpperCase();
         if (normalized === "ACCEPT") {
           cleanup();
