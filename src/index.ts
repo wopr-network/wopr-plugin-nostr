@@ -91,7 +91,6 @@ const plugin: WOPRPlugin = {
           type: "channel",
           id: "nostr",
           displayName: "Nostr",
-          tier: "byok",
         },
       ],
     },

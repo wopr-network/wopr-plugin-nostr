@@ -1,5 +1,6 @@
 import * as nip19 from "nostr-tools/nip19";
 import { verifyEvent } from "nostr-tools/pure";
+import { nostrChannelProvider } from "./channel-provider.js";
 import { decryptDM, derivePublicKey, formatNpub } from "./crypto.js";
 import type { EventPublisher } from "./event-publisher.js";
 import type { NostrConfig, NostrEvent, WOPRPluginContext } from "./types.js";
@@ -75,6 +76,25 @@ export class EventHandler {
     const channelRef = { type: "nostr", id: channelId, name: "Nostr DM" };
 
     this.ctx.logMessage(sessionKey, plaintext, { from: npub, channel: channelRef });
+
+    // Check registered message parsers before falling through to LLM injection
+    const parsers = nostrChannelProvider.getMessageParsers();
+    for (const parser of parsers) {
+      const matched = parser.pattern instanceof RegExp ? parser.pattern.test(plaintext) : parser.pattern(plaintext);
+      if (matched) {
+        await parser.handler({
+          channel: channelId,
+          channelType: "nostr",
+          sender: event.pubkey,
+          content: plaintext,
+          reply: async (msg: string) => {
+            await this.publisher.publishDM(msg, event.pubkey);
+          },
+          getBotUsername: () => nostrChannelProvider.getBotUsername(),
+        });
+        return; // consumed by parser — skip LLM injection
+      }
+    }
 
     let response: string;
     try {
