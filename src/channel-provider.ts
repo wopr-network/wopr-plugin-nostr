@@ -1,4 +1,10 @@
-import type { ChannelCommand, ChannelMessageParser, ChannelProvider } from "@wopr-network/plugin-types";
+import type {
+  ChannelCommand,
+  ChannelMessageParser,
+  ChannelNotificationCallbacks,
+  ChannelNotificationPayload,
+  ChannelProvider,
+} from "@wopr-network/plugin-types";
 import type { EventPublisher } from "./event-publisher.js";
 
 let publisher: EventPublisher | null = null;
@@ -59,5 +65,49 @@ export const nostrChannelProvider: ChannelProvider = {
 
   getBotUsername(): string {
     return botNpub;
+  },
+
+  async sendNotification(
+    channelId: string,
+    payload: ChannelNotificationPayload,
+    callbacks?: ChannelNotificationCallbacks,
+  ): Promise<void> {
+    if (payload.type !== "friend-request") return;
+    if (!channelId.startsWith("dm:")) return;
+    if (!publisher) throw new Error("Nostr publisher not initialized");
+
+    const recipientPubkey = channelId.slice(3);
+    const from = payload.from ?? "someone";
+    const message = `Friend request from ${from}. Reply ACCEPT or DENY.`;
+
+    await publisher.publishDM(message, recipientPubkey);
+
+    if (!callbacks?.onAccept && !callbacks?.onDeny) return;
+
+    const parserId = `notif-friend-request-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    const cleanup = () => {
+      nostrChannelProvider.removeMessageParser(parserId);
+      clearTimeout(timer);
+    };
+
+    const timer = setTimeout(cleanup, 5 * 60 * 1000);
+
+    const parser: ChannelMessageParser = {
+      id: parserId,
+      pattern: (msg: string) => /^\s*(accept|deny)\s*$/i.test(msg),
+      handler: async (ctx) => {
+        const normalized = ctx.content.trim().toUpperCase();
+        if (normalized === "ACCEPT") {
+          cleanup();
+          await callbacks?.onAccept?.();
+        } else if (normalized === "DENY") {
+          cleanup();
+          await callbacks?.onDeny?.();
+        }
+      },
+    };
+
+    nostrChannelProvider.addMessageParser(parser);
   },
 };

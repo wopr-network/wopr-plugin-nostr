@@ -1,5 +1,7 @@
 // Re-export shared types from @wopr-network/plugin-types
 export type {
+  ChannelNotificationCallbacks,
+  ChannelNotificationPayload,
   ChannelProvider,
   ChannelRef,
   ConfigField,
